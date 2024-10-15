@@ -10,25 +10,25 @@ from networks.resNet import seresnet12
 def count_acc(logits, label):
     '''count Acc(normalized)'''
     pred = torch.argmax(logits, dim=1)
-    correct = ((pred == label).sum().item()) / label.size(0)  # 获取预测正确的样本数
-    return correct  # 计算精确度
+    correct = ((pred == label).sum().item()) / label.size(0)  # Get the number of samples predicted correctly.
+    return correct  # count accuracy
 
 
 
-#数据
+#data
 train_data = MvTec(mode='train')
 val_data = MvTec(mode='val')
 trainLoader = DataLoader(train_data, batch_size = 64, shuffle=True, drop_last=True)
 valLoader = DataLoader(val_data, batch_size = 64, shuffle=True, drop_last=True)
 
-#网络
+#network
 model = seresnet12(avg_pool = True, drop_rate = 0.1, dropblock_size = 2, num_classes = 42)
 model = model.to('cuda')
 
-#损失函数
+#loss_fn
 criterion = torch.nn.CrossEntropyLoss().to('cuda')
 
-#优化器
+#optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr = 0.05, weight_decay = 5e-4, momentum = 0.9)
 
 if __name__ == '__main__':

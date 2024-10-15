@@ -44,10 +44,10 @@ def parse_option():
     return opt
 
 
-# 参数池
+# parameters pool
 opt = parse_option()
 
-# 模型
+# model
 # model = seresnet12(avg_pool=True, drop_rate=0.1, dropblock_size=2, num_classes = opt.n_ways)
 # model.fc = nn.Linear(64, opt.n_ways)
 model = ConvNet()
@@ -59,7 +59,7 @@ model = ConvNet()
 # pretrained_dic = torch.load(r'D:\pth_save\embedding\resnet12_last.pth')['model']
 # pretrained_dic = torch.load('./pth_save/embedding/resnet_last.pth')['model']
 
-# 过滤掉不匹配的权重（这里主要是最后一层）
+# Filter out unmatched weights (mainly the last layer here)
 # model_dic = model.state_dict()
 # pretrained_dict = {k: v for k, v in pretrained_dic.items() if 'classifier.' not in k}
 # model_dic.update(pretrained_dict)
@@ -67,10 +67,10 @@ model = ConvNet()
 
 model.to('cuda')
 # fcone = nn.Linear(64, 1).to('cuda')
-# criterion/损失函数
+# criterion
 # criterion = nn.CrossEntropyLoss().to('cuda')
 
-# optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #元优化器
+# optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #meta-optimizer
 optimizer = optim.Adam(model.parameters(), lr=opt.meta_lr, weight_decay=opt.weight_decay)
 
 # data
@@ -80,11 +80,11 @@ train_acc_pool = []
 test_acc_pool = []
 
 if __name__ == '__main__':
-    # 训练
+    # training
     for epoch in range(1, opt.epochs + 1):
         print('==> Training...')
         print(f'--------epoch{epoch}--------')
-        losses_q = [0 for _ in range(opt.inner_iters + 1)]  # losses_q[i] 是进行第 i 次更新后的 task_num 个 loss 值之和
+        losses_q = [0 for _ in range(opt.inner_iters + 1)]  # losses_q[i] is the sum of the task_num loss values ​​after the i-th update
         corrects = [0 for _ in range(opt.inner_iters + 1)]
         
         init_param = OrderedDict(model.named_parameters())
@@ -98,12 +98,12 @@ if __name__ == '__main__':
             support_label = torch.tensor(support_label, device='cuda').reshape(-1, )
             query_label = torch.tensor(query_label, device='cuda').reshape(-1, )
 
-            # 1. 针对其中一个 Meta Task 进行第一次前向传播和反向传播
-            logits = model.forward_fast_weights(support_data, init_param)  # 第一次前向传播
+            # 1. Perform the first forward and backward pass on one of the Meta Tasks
+            logits = model.forward_fast_weights(support_data, init_param)  # the first forward
             loss = F.cross_entropy(logits, support_label)
             fast_weights = model.update_params(loss, init_param, step_size=opt.gd_lr, first_order = True)
 
-            # 2. 计算模型原始参数在query set上的loss和准确率
+            # 2. Calculate the loss and accuracy of the original model parameters on the query set
 
             with torch.no_grad():
                 logitis_query = model.forward_fast_weights(query_data, init_param)
@@ -123,10 +123,10 @@ if __name__ == '__main__':
 
 
             for k in range(1, opt.inner_iters):
-                # 1. 使用 support set 对模型进行参数更新
+                # 1. Use support set to update model parameters
                 logits = model.forward_fast_weights(support_data, fast_weights)  # 0.1GB
                 loss = F.cross_entropy(logits, support_label)
-                # 3. 再次更新梯度，保存为 updated_params
+                # 3. Update the gradient again and save it as updated_params
                 fast_weights = model.update_params(loss, fast_weights, step_size=opt.gd_lr, first_order = True)
 
                 # 2024/3/20
@@ -134,11 +134,9 @@ if __name__ == '__main__':
 
                     with torch.no_grad():
                         logits_q = model.forward_fast_weights(query_data, fast_weights)  # 0.5GB
-                        # 计算损失
                         loss_q = F.cross_entropy(logits_q, query_label)
                 else:
                     logits_q = model.forward_fast_weights(query_data, fast_weights)
-                    # 计算损失
                     loss_q = F.cross_entropy(logits_q, query_label)
 
                 losses_q[k + 1] += loss_q.cpu()
@@ -157,7 +155,6 @@ if __name__ == '__main__':
 #         fcone.weight.data =  fcone.weight.data - opt.meta_lr * weights_grad.sum(dim = 0)
 #         fcone.bias.data = fcone.bias.data - opt.meta_lr * bias_grad.sum(dim = 0)
         optimizer.step()
-        # 准确率
         accs = np.array(corrects) / opt.batch_tasks
         print('Epoch {}: Train Acc: {}'.format(epoch, accs))
         if epoch % 20 == 0:

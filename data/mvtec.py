@@ -22,7 +22,7 @@ def parse_option():
 
 class MvTec():
     """
-    划分MVTec数据集, 集合了所有缺陷的种类
+    Divide the MVTec dataset to collect all types of defects.
     """
 
     def __init__(self):
@@ -79,7 +79,7 @@ class MvTec():
 
 class MvTec_test(Dataset):
     def __init__(self, root = '../data/mvtec', mode = 'train'):
-        # 设置随机种子
+        # Setting the random seed.
         # random.seed(2)
         self.root = root
         self.test_cat = folder7['meta-test']
@@ -106,56 +106,3 @@ class MvTec_test(Dataset):
     def __len__(self):
         # pass
         return len(self.list_to_files)
-# class metaMvTec():
-
-#     """
-#     划分MVTec数据集, 集合了所有缺陷的种类
-#     """
-
-#     def __init__(self):
-#         self.opt = parse_option()
-#         self.root = self.opt.data_root
-#         self.n_way = self.opt.n_way
-#         self.k_shot = self.opt.k_shots
-#         self.k_query = self.opt.k_queries
-#         self.train_category = folder1['meta_train']
-#         self.test_category = folder1['meta_test']
-#         self.cls_to_files = cls_files(os.listdir(self.root), self.root)
-#     def sample(self, mode='train'):
-#         data_dict = {}
-#         if 'train' == mode:
-#             random_way = random.sample(self.train_category, self.n_way)
-#             label = [i for i in range(self.n_way)]
-#             random.shuffle(label)  # random label
-#             for l, way in zip(label, random_way):
-#                 data_dict[l] = random.sample(self.cls_to_files[way], self.k_shot + self.k_query)
-#         elif 'test' == mode:
-#             random_way = random.sample(self.test_category, self.n_way)
-#             label = [i for i in range(self.n_way)]
-#             random.shuffle(label)  # random label
-#             for l, way in zip(label, random_way):
-#                 data_dict[l] = random.sample(self.cls_to_files[way], self.k_shot + self.k_query)
-#         else:
-#             raise "input error!"
-
-
-#         support_list = [(i, file) for i, files in data_dict.items() for file in files[:self.k_shot]]
-#         query_list = [(i, file) for i, files in data_dict.items() for file in files[self.k_shot:]]
-#         random.shuffle(support_list), random.shuffle(query_list)
-
-#         support_label = []
-#         query_label = []
-#         support_data = []
-#         query_data = []
-#         for tup in support_list:
-#             label, data = tup
-#             support_data.append(data)
-#             support_label.append(label)
-
-#         for tup in query_list:
-#             label, data = tup
-#             query_data.append(data)
-#             query_label.append(label)
-
-#         return files_to_tensor(support_data, mode = 'meta'), support_label, files_to_tensor(query_data, mode = 'meta'), query_label
-# #         return support_data, support_label, query_data, query_label

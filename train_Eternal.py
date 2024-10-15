@@ -56,12 +56,12 @@ def parse_option():
     return opt
 
 
-# 参数池
+# parameters pooling
 opt = parse_option()
 
-# 模型
+# model
 # model = seresnet12(avg_pool=True, drop_rate=0.1, dropblock_size = 2, num_classes = opt.n_ways)
-# 模型
+
 
 model = seresnet12(avg_pool=True, drop_rate = 0.1, dropblock_size = 3, num_classes = opt.n_ways)
 
@@ -70,7 +70,7 @@ model = seresnet12(avg_pool=True, drop_rate = 0.1, dropblock_size = 3, num_class
 '''load feature extractor params'''
 # pretrained_dic = torch.load('./pth_save/folder3_seresnet12/seresnet12_last.pth')['model']
 
-# 过滤掉不匹配的权重（这里主要是最后一层）
+# Filter out unmatched weights (mainly the last layer here)
 # model_dic = model.state_dict()
 # pretrained_dict = {k: v for k, v in pretrained_dic.items() if 'classifier.' not in k}
 # model_dic.update(pretrained_dict)
@@ -78,12 +78,12 @@ model = seresnet12(avg_pool=True, drop_rate = 0.1, dropblock_size = 3, num_class
 
 model.to('cuda')
 
-#第一次初始化分类头
+#Initialize the classification head for the first time
 # fcone = nn.Linear(640, 1).to('cuda')
 fcone = nn.Linear(640, 1).to('cuda')
 
 
-#criterion/损失函数
+#criterion
 criterion = nn.CrossEntropyLoss().to('cuda')
 grad_lr = opt.gd_lr
 # optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #元优化器
@@ -101,7 +101,7 @@ train_acc_pool = []
 test_acc_pool = []
 the_best_test_acc = 0
 if __name__ == '__main__':
-    # 训练
+    # training
 #     set cosine annealing scheduler
 #     if opt.cosine:
 #         eta_min = opt.meta_lr * (opt.lr_decay_rate ** 3)
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         
         print('==> Training...')
         print(f'--------epoch{epoch}--------')
-        losses_q = [0 for _ in range(opt.inner_iters + 1)]  # losses_q[i] 是进行第 i 次更新后的 task_num 个 loss 值之和
+        losses_q = [0 for _ in range(opt.inner_iters + 1)]  # losses_q[i] is the sum of the task_num loss values ​​after the ith update
         corrects = [0 for _ in range(opt.inner_iters + 1)]
         
         
@@ -130,15 +130,15 @@ if __name__ == '__main__':
             support_label = torch.tensor(support_label, device='cuda').reshape(-1, )
             query_label = torch.tensor(query_label, device='cuda').reshape(-1, )
 
-            # 1. 针对其中一个 Meta Task 进行第一次前向传播和反向传播
-            logits = model.forward_fast_weights(support_data, init_param)  # 第一次前向传播
+            # 1. Perform the first forward and backward pass on one of the Meta Tasks
+            logits = model.forward_fast_weights(support_data, init_param)  # the first forward
 #             logits = logits / opt.temperature
             loss = F.cross_entropy(logits, support_label)
 #             fast_weights, acc_gradients = model.update_params(loss, init_param, acc_gradients, step_size=opt.gd_lr, first_order=True)
             fast_weights = model.update_params(loss, init_param, step_size = grad_lr, first_order=True)
 
 
-            # 2. 计算模型原始参数在query set上的loss和准确率
+            # 2. Calculate the loss and accuracy of the original model parameters on the query set
             with torch.no_grad():
                 logitis_query = model.forward_fast_weights(query_data, init_param)
                 loss = F.cross_entropy(logitis_query, query_label)
@@ -155,11 +155,11 @@ if __name__ == '__main__':
                 corrects[1] += acc
 
             for k in range(1, opt.inner_iters):
-                # 1. 使用 support set 对模型进行参数更新
+                # 1. Use support set to update model parameters
                 logits = model.forward_fast_weights(support_data, fast_weights)  # 0.1GB\
 #                 logits = logits / opt.temperature
                 loss = F.cross_entropy(logits, support_label)
-                # 3. 再次更新梯度，保存为 updated_params
+                # 3. Update the gradient again and save it as updated_params
 #                 fast_weights, acc_gradients = model.update_params(loss, fast_weights, acc_gradients, step_size=opt.gd_lr, first_order=True)
                 fast_weights = model.update_params(loss, fast_weights, step_size = grad_lr, first_order=True)
 
@@ -169,12 +169,12 @@ if __name__ == '__main__':
                     with torch.no_grad():
                         logits_q = model.forward_fast_weights(query_data, fast_weights)  # 0.5GB
                         
-                        # 计算损失
+                        # count loss
                         loss_q = F.cross_entropy(logits_q, query_label)
                 else:
                     logits_q = model.forward_fast_weights(query_data, fast_weights)
 #                     logits_q = logits_q / opt.temperature
-                    # 计算损失
+                    # count loss
                     loss_q = F.cross_entropy(logits_q, query_label)
 
                 losses_q[k + 1] += loss_q.cpu()
@@ -198,7 +198,7 @@ if __name__ == '__main__':
         
         optimizer.step()
         
-        # 准确率
+        # accuracy
         accs = np.array(corrects) / opt.batch_tasks
         print('Epoch {}: Train Acc: {}'.format(epoch, accs))
         

@@ -63,7 +63,7 @@ model.classifier.bias.data = fcone.bias.data.repeat(opt.n_ways, 1).reshape(-1,)
 #criterion
 criterion = nn.CrossEntropyLoss().to('cuda')
 
-# optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #元优化器
+# optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #meta-optimizer
 optimizer = optim.Adam(model.parameters(), lr = opt.meta_lr, weight_decay = opt.weight_decay)
 
 #data

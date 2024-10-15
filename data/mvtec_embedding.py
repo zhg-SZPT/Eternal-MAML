@@ -18,7 +18,7 @@ def cls2files(catgory, root):
 
 class MvTec(Dataset):
     def __init__(self, root = '../data/mvtec', mode = 'train'):
-        # 设置随机种子
+        # Setting the random seed.
         # random.seed(2)
         self.root = root
         self.train_cat = folder8['meta-train']

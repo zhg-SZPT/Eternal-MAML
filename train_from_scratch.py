@@ -12,11 +12,11 @@ from category_split import *
 def count_acc(logits, label):
     '''count Acc(normalized)'''
     pred = torch.argmax(logits, dim=1)
-    correct = ((pred == label).sum().item()) / label.size(0)  # 获取预测正确的样本数
-    return correct  # 计算精确度
+    correct = ((pred == label).sum().item()) / label.size(0)  # Get the number of samples predicted correctly
+    return correct  # count accuracy
 
 
-# 数据
+# data
 # train_data = MvTec(mode='train')
 # val_data = MvTec(mode='val')
 # trainLoader = DataLoader(train_data, batch_size=64, shuffle=True, drop_last=True)
@@ -29,16 +29,16 @@ test_test_data = MvTec_test(mode = 'test')
 testLoader = DataLoader(test_test_data, batch_size=64, shuffle=True, drop_last=True)
 
 
-# 网络
+# network
 n_way = 3
 model = torchvision.models.resnet50(pretrained=True)
 model.fc = nn.Linear(2048, n_way)
 model = model.to('cuda')
 
-# 损失函数
+# loss_fn
 criterion = torch.nn.CrossEntropyLoss().to('cuda')
 
-# 优化器
+# optimizer
 optimizer = optim.Adam(model.parameters(), lr = 1e-3, weight_decay = 5e-2)
 
 if __name__ == '__main__':
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     model.train()
     for epoch in range(1, epochs + 1):
         if(epoch == 1 or epoch % 10 == 0):
-            random_industrail = random.sample(folder8['meta-test'], 3) #随机抽取三个类别
+            random_industrail = random.sample(folder8['meta-test'], 3) #Randomly select three categories
             
         print(f'--------epoch{epoch}--------')
         print('==> Training...')

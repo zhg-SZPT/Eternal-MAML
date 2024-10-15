@@ -9,15 +9,15 @@ import torch
 def count_acc(logits, label, n_way):
     '''count Acc(normalized)'''
     pred = torch.argmax(logits, dim=1)
-    Acc_class = ((pred == label).sum().item()) / label.size(0) # 获取预测正确的样本数
+    Acc_class = ((pred == label).sum().item()) / label.size(0) # Get the number of samples predicted correctly
     Acc_rc = 1 / n_way
     correct = (Acc_class - Acc_rc) / (1 - Acc_rc)
-    return correct  # 计算精确度
+    return correct  # count Acc_nor
 
 
-# 根据传入的数据地址列表，拿到所有文件的相对路径
+# According to the incoming data address list, get the relative path of all files
 def generate_file_list(list_dir):
-    extension = ('.png', '.PNG', 'JPG', 'JPEG')#用于检查文件名是否以指定的扩展名结尾
+    extension = ('.png', '.PNG', 'JPG', 'JPEG') #Used to check whether the file name ends with the specified extension
     file_list = []
     for path in list_dir:
         for filename in os.listdir(path):
@@ -35,12 +35,12 @@ def adjust_learning_rate(epoch, optimizer, lr_decay_epochs = [60,80], learning_r
             param_group['lr'] = new_lr
             
 def get_transforms(mode = 'embedding'):
-    # 使用列表生成式计算归一化参数
+    # Compute normalization parameters using list comprehensions
 
-    # 创建组合转换
+    # Creating a Composite Transformation
     if mode == 'meta':
         transform = transforms.Compose([
-            transforms.Resize((128, 128)),  # Resize 应该接受整数或者(h, w)的元组
+            transforms.Resize((128, 128)),  # Resize should accept an integer or a tuple of (h, w)
             transforms.RandomHorizontalFlip(),
 #             transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
             transforms.ToTensor(),

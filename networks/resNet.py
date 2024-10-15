@@ -351,7 +351,7 @@ class ResNet(nn.Module):
 #         # for name, param, grad in zip(name_list, tensor_list, grads):
 #         for name, param, grad in zip(name_list, tensor_list, grads):
 #             if 'classifier.' in name:
-#                 #只更新分类头
+#                 #Update only the classifier head.
 #                 updated_params[name] = param - step_size * grad
 #             else:
 #                 updated_params[name] = param

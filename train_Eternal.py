@@ -86,7 +86,7 @@ fcone = nn.Linear(640, 1).to('cuda')
 #criterion
 criterion = nn.CrossEntropyLoss().to('cuda')
 grad_lr = opt.gd_lr
-# optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #元优化器
+# optimizer = optim.SGD(model.parameters(), lr= args.meta_lr) #meta-optimizer
 # classifier_parameters = model.classifier.parameters()
 
 optimizer = optim.Adam(model.parameters(), lr = opt.meta_lr, weight_decay=opt.weight_decay)
